@@ -1,6 +1,6 @@
-use api::auth;
 use api::config;
 use api::cors;
+use api::keycloak_auth;
 use api::router;
 use api::state;
 use tower_http::trace;
@@ -14,7 +14,7 @@ async fn main() -> eyre::Result<()> {
     let config = config::Config::new()?;
 
     let state = state::AppState::new(&config.database_url(), config.max_connections()).await?;
-    let auth_layer = auth::create_auth_layer::<auth::AppRole>(&config);
+    let auth_layer = keycloak_auth::create_auth_layer::<keycloak_auth::AppRole>(&config);
     let cors_layer = cors::cors_layer(&config)?;
 
     let app = router::app_router(auth_layer)
@@ -27,9 +27,7 @@ async fn main() -> eyre::Result<()> {
         use api::openapi;
         use axum::routing;
 
-        app.merge(
-            axum::Router::new().route("/scalar", routing::get(openapi::scalar))
-        )
+        app.merge(axum::Router::new().route("/scalar", routing::get(openapi::scalar)))
     };
 
     let listener = tokio::net::TcpListener::bind(config.addrs()).await?;

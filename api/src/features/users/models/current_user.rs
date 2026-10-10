@@ -2,14 +2,14 @@ use axum::extract;
 use axum::http::request;
 use axum_keycloak_auth::decode;
 
-use crate::auth;
 use crate::errors;
 use crate::features::users::models;
+use crate::keycloak_auth;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct CurrentUser {
     pub id: models::UserId,
-    pub roles: Vec<auth::AppRole>,
+    pub roles: Vec<keycloak_auth::AppRole>,
     pub username: String,
     pub email: String,
 }
@@ -23,7 +23,7 @@ where
     async fn from_request_parts(parts: &mut request::Parts, _state: &S) -> Result<Self, Self::Rejection> {
         let token = parts
             .extensions
-            .get::<decode::KeycloakToken<auth::AppRole>>()
+            .get::<decode::KeycloakToken<keycloak_auth::AppRole>>()
             .ok_or(errors::ApiError::Unauthorized)?;
 
         let id = token
