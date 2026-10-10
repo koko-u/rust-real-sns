@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgres:18-trixie
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    restart: always
+    volumes:
+      - type: volume
+        source: real-sns_db_data
+        target: /var/lib/postgresql
+        volume:
+          nocopy: true
+    ports:
+      - "${DATABASE_PORT}:5432"
+  ui:
+    image: dpage/pgadmin4:9
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      # servers.json で使用する環境変数をpgAdminコンテナに渡す
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      # pgAdmin に servers.json の場所を教える
+      PGADMIN_SERVER_JSON_FILE: /var/lib/pgadmin/servers/servers.json
+    ports:
+      - "${PGADMIN_PORT}:80"
+    volumes:
+      - real-sns_pgadmin_data:/var/lib/pgadmin
+      - ./config/servers.json.template:/pgadmin4/servers.json.template
+      - ./pgadmin_entrypoint.sh:/pgadmin_entrypoint.sh
+    entrypoint: [ "/bin/bash", "/pgadmin_entrypoint.sh" ]
+    depends_on:
+      - db
+  keycloak:
+    image: keycloak/keycloak:26.7
+    container_name: keycloak
+    restart: always
+    ports:
+      - "8085:8080"
+
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN_USER}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB_NAME}
+      - KC_DB_USERNAME=${KEYCLOAK_DB_USER}
+      - KC_DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+
+    command:
+      - start-dev
+      - --import-realm
+
+    volumes:
+      - ./realm:/opt/keycloak/data/import:ro
+
+    depends_on:
+      - keycloak-db
+  keycloak-db:
+    image: postgres:18-trixie
+    container_name: keycloak-db
+    restart: always
+
+    environment:
+      - POSTGRES_USER=${KEYCLOAK_DB_USER}
+      - POSTGRES_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+      - POSTGRES_DB=${KEYCLOAK_DB_NAME}
+
+    volumes:
+      - real-sns_keycloak_data:/var/lib/postgresql
+volumes:
+  real-sns_db_data:
+  real-sns_pgadmin_data:
+  real-sns_keycloak_data:

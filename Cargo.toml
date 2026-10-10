@@ -1,0 +1,107 @@
+[workspace]
+members = [
+    "api",
+]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["KOZAKI Tsuneaki <kozaki.tsuneaki@gmail.com>"]
+license = "MIT"
+
+[workspace.dependencies]
+better_default = { version = "1.0.5", features = [] }
+clap = { version = "4.6.7", features = ["derive", "env"] }
+color-eyre = { version = "0.6.5", features = [] }
+derive_more = { version = "2.1.1", features = ["full"] }
+eyre = { version = "0.6.14", features = ["auto-install"] }
+into_inner = { version = "0.1.2", features = [] }
+itertools = { version = "0.15.0", features = [] }
+rslug = { version = "0.3.0", features = [] }
+rust_decimal = { version = "1.43.0", features = [
+    "db-tokio-postgres",
+    "macros",
+    "serde-with-arbitrary-precision",
+    "serde-with-float",
+    "serde-with-str",
+    "serde_json",
+] }
+secrecy = { version = "0.10.3", features = ["serde"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.151", features = [
+    "preserve_order",
+    "arbitrary_precision",
+] }
+sql-forge = { version = "0.5.0", features = [] }
+sqlx = { version = "0.9.0", default-features = false, features = [
+    "macros",
+    "postgres",
+    "runtime-tokio",
+    "tls-rustls",
+    "uuid",
+    "time",
+    "rust_decimal",
+] }
+strum = { version = "0.28.0", features = ["derive"] }
+time = { version = "0.3.55", features = [
+    "formatting",
+    "local-offset",
+    "macros",
+    "parsing",
+    "serde",
+    "serde-well-known",
+    "serde-human-readable",
+] }
+tracing = { version = "0.1.44", features = ["log"] }
+tracing-subscriber = { version = "0.3.23", features = [
+    "env-filter",
+    "json",
+    "local-time",
+    "matchers",
+    "time",
+    "tracing",
+    "tracing-serde",
+    "tracing-log",
+] }
+uom = { version = "0.38.0", features = [
+    "i32",
+    "i64",
+    "serde",
+    "try-from",
+] }
+url = { version = "2.5.8", features = ["serde"] }
+uuid = { version = "1.26.1", features = [
+    "serde",
+    "fast-rng",
+    "v4",
+    "v7",
+] }
+
+axum = { version = "0.8.9", features = ["macros"] }
+axum-keycloak-auth = { version = "0.8.3", features = [] }
+garde = { version = "0.23.0", features = [
+    "derive",
+    "email",
+    "pattern",
+    "rust_decimal",
+    "serde",
+    "unicode",
+    "url",
+] }
+hyper = { version = "1.11.1", features = ["full"] }
+tokio = { version = "1.53.1", features = ["full"] }
+tokio-util = { version = "0.7.19", features = ["full"] }
+tower = { version = "0.5.3", features = ["full"] }
+tower-http = { version = "0.7.1", features = ["full"] }
+
+scalar_api_reference = { version = "0.2.4", features = ["axum"] }
+utoipa = { version = "5.5.0", features = [
+    "config",
+    "decimal_float",
+    "preserve_path_order",
+    "preserve_order",
+    "time",
+    "url",
+    "uuid",
+] }
