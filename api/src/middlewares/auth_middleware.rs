@@ -46,7 +46,7 @@ pub async fn auth_middleware(
         return Err(errors::ApiError::unauthorized("Invalid JWT subject"));
     };
 
-    // get session data
+    // get session data (which is not expired)
     let session_id = decoded
         .claims
         .session_id
