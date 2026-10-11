@@ -14,7 +14,7 @@ impl CreateBrand {
     pub async fn validate_into(
         self,
         pool: &sqlx::PgPool,
-    ) -> Result<commands::CreateBrand, errors::ValidationError> {
+    ) -> Result<commands::CreateBrand, errors::ServerError> {
         use garde::Validate as _;
         let garde_result = self.validate();
 
@@ -40,7 +40,7 @@ impl CreateBrand {
             }),
             (result1, result2) => {
                 let report = merge!(result1, result2);
-                Err(errors::ValidationError::Validation(report))
+                Err(errors::ServerError::Validation(report))
             }
         }
     }

@@ -16,7 +16,7 @@ impl UpdateBrand {
         self,
         id: models::ProductBrandId,
         pool: &sqlx::PgPool,
-    ) -> Result<commands::UpdateBrand, errors::ValidationError> {
+    ) -> Result<commands::UpdateBrand, errors::ServerError> {
         use garde::Validate as _;
         let garde_result = self.validate();
 
@@ -43,7 +43,7 @@ impl UpdateBrand {
             }),
             (result1, result2) => {
                 let report = merge!(result1, result2);
-                Err(errors::ValidationError::Validation(report))
+                Err(errors::ServerError::Validation(report))
             }
         }
     }

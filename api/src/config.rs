@@ -3,6 +3,7 @@ use secrecy::SecretString;
 use tower_http::cors;
 
 use crate::shared;
+use crate::state;
 
 #[derive(Debug, clap::Parser)]
 pub struct Config {
@@ -10,6 +11,23 @@ pub struct Config {
     host: url::Host,
     #[arg(long, env = "SERVER_PORT", default_value_t = 3000)]
     port: u16,
+
+    #[arg(long, env = "SEMAPHORE_SIZE", default_value_t = shared::SemaphoreSize::default())]
+    semaphore_size: shared::SemaphoreSize,
+
+    #[arg(long, env = "JWT_ISSUER", default_value = "localhost")]
+    jwt_issuer: String,
+    #[arg(long, env = "JWT_AUDIENCE", default_value = "localhost")]
+    jwt_audience: String,
+
+    #[arg(long, env = "JWT_SECRET_KEY", default_value = "secret")]
+    jwt_secret_key: SecretString,
+
+    #[arg(long, env = "JWT_TOKEN_EXPIRATION_MINUTES", default_value = "10", value_parser = parse_minutes )]
+    jwt_token_expiration: time::Duration,
+
+    #[arg(long, env = "REFRESH_TOKEN_EXPIRATION_DAYS", default_value = "14", value_parser = parse_days)]
+    refresh_token_expiration: time::Duration,
 
     #[arg(long, env = "CORS_ALLOW_ORIGINS", value_delimiter = ',', default_value = "*")]
     allow_origins: Vec<String>,
@@ -94,6 +112,20 @@ impl Config {
         )
     }
 
+    pub fn semaphore_size(&self) -> shared::SemaphoreSize {
+        self.semaphore_size
+    }
+
+    pub fn jwt_config(&self) -> state::JwtConfig {
+        state::JwtConfig {
+            jwt_secret_key: self.jwt_secret_key.clone(),
+            jwt_issuer: self.jwt_issuer.clone(),
+            jwt_audience: self.jwt_audience.clone(),
+            jwt_token_expiration: self.jwt_token_expiration,
+            refresh_token_expiration: self.refresh_token_expiration,
+        }
+    }
+
     pub fn max_connections(&self) -> shared::MaxConnections {
         self.max_connections
     }
@@ -134,4 +166,14 @@ impl Config {
 
 fn parse_host(s: &str) -> Result<url::Host, url::ParseError> {
     url::Host::parse(s)
+}
+
+fn parse_minutes(s: &str) -> Result<time::Duration, std::num::ParseIntError> {
+    let minutes = s.parse::<i64>()?;
+    Ok(time::Duration::minutes(minutes))
+}
+
+fn parse_days(d: &str) -> Result<time::Duration, std::num::ParseIntError> {
+    let days = d.parse::<i64>()?;
+    Ok(time::Duration::days(days))
 }

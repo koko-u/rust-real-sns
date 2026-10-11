@@ -13,7 +13,7 @@ async fn main() -> eyre::Result<()> {
         .init();
     let config = config::Config::new()?;
 
-    let state = state::AppState::new(&config.database_url(), config.max_connections()).await?;
+    let state = state::AppState::new(&config).await?;
     let auth_layer = keycloak_auth::create_auth_layer::<keycloak_auth::AppRole>(&config);
     let cors_layer = cors::cors_layer(&config)?;
 

@@ -36,7 +36,7 @@ pub async fn delete_brand(
                     garde::Path::new("id"),
                     garde::Error::new(format!("Product id='{id}' not found")),
                 );
-                Err(errors::ApiError::Validation(report))
+                Err(errors::ServerError::Validation(report))
             }
         }
     })

@@ -1,4 +1,6 @@
 use better_default::Default as BetterDefault;
+use into_inner::IntoInner;
+
 #[derive(
     Debug,
     Copy,
@@ -9,8 +11,8 @@ use better_default::Default as BetterDefault;
     BetterDefault,
     derive_more::Display,
     derive_more::From,
-    derive_more::Into,
     derive_more::FromStr,
+    into_inner::IntoInner,
     serde::Serialize,
     serde::Deserialize,
 )]

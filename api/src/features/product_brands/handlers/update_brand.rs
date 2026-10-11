@@ -42,7 +42,7 @@ pub async fn update_brand(
                     garde::Path::empty(),
                     garde::Error::new("Cannot update product, it may conflict the name"),
                 );
-                Err(errors::ApiError::Validation(report))
+                Err(errors::ServerError::Validation(report))
             }
         }
     })
