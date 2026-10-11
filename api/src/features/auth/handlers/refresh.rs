@@ -16,6 +16,7 @@ use crate::state;
     params(
         ("refresh_token" = String, Cookie, description = "Refresh Token")
     ),
+    security(()),
     responses(
         (
             status = 200,

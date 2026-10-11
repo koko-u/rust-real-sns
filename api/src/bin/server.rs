@@ -3,6 +3,7 @@ use api::cors;
 use api::keycloak_auth;
 use api::router;
 use api::state;
+use axum::middleware;
 use tower_http::trace;
 use tracing_subscriber::EnvFilter;
 
@@ -14,10 +15,10 @@ async fn main() -> eyre::Result<()> {
     let config = config::Config::new()?;
 
     let state = state::AppState::new(&config).await?;
-    let auth_layer = keycloak_auth::create_auth_layer::<keycloak_auth::AppRole>(&config);
+    //let auth_layer = keycloak_auth::create_auth_layer::<keycloak_auth::AppRole>(&config);
     let cors_layer = cors::cors_layer(&config)?;
 
-    let app = router::app_router(auth_layer)
+    let app = router::app_router(state.clone())
         .layer(cors_layer)
         .layer(trace::TraceLayer::new_for_http())
         .with_state(state);

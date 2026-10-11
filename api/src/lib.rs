@@ -7,4 +7,5 @@ pub mod state;
 
 mod errors;
 mod features;
+mod middlewares;
 mod shared;

@@ -1,14 +1,13 @@
 use sqlx::postgres;
 
 use crate::config;
-use crate::shared;
 use crate::state;
 
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub pool: sqlx::PgPool,
     pub passwords: state::PasswordService,
-    pub jwt_config: state::JwtConfig,
+    pub jwt_config: std::sync::Arc<state::JwtConfig>,
 }
 
 impl AppState {
@@ -37,7 +36,7 @@ impl AppState {
         Ok(Self {
             pool,
             passwords,
-            jwt_config,
+            jwt_config: std::sync::Arc::new(jwt_config),
         })
     }
 }

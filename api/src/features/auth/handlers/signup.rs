@@ -11,6 +11,7 @@ use crate::state;
 #[utoipa::path(
     post,
     path = "/signup",
+    security(()),
     request_body = requests::SignupRequest,
     tag = "Auth",
     responses(

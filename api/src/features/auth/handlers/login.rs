@@ -14,6 +14,7 @@ use crate::state;
 #[utoipa::path(
     post,
     path = "/login",
+    security(()),
     request_body = requests::LoginRequest,
     tag = "Auth",
     responses(
@@ -37,14 +38,14 @@ pub async fn login(
     // 1. username からユーザーを取得する
     let Some(user) = u_repositories::select_by_username(&state.pool, &username).await? else {
         tracing::warn!("Invalid username: {}", username);
-        return Err(errors::ApiError::Unauthorized);
+        return Err(errors::ApiError::unauthorized("Invalid username or password"));
     };
 
     // 2. パスワードを検証する
     let verified = state.passwords.verify(&password, &user.password_hash).await?;
     if !verified {
         tracing::warn!("Invalid password: {}", password);
-        return Err(errors::ApiError::Unauthorized);
+        return Err(errors::ApiError::unauthorized("Invalid username or password"));
     }
 
     let now = time::OffsetDateTime::now_utc();
