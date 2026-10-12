@@ -1,3 +1,4 @@
+mod filenames;
 pub mod macros;
 mod max_connections;
 pub mod params;
@@ -6,6 +7,7 @@ pub mod responses;
 mod semaphore_size;
 mod tx;
 
+pub use filenames::generate_random_filename;
 pub use max_connections::MaxConnections;
 pub use refresh_token::RefreshTokenPair;
 pub use refresh_token::generate_refresh_token;

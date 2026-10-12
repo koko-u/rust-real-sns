@@ -10,6 +10,12 @@ use crate::shared::responses;
 pub enum ServerError {
     #[display("Database error: {}", _0)]
     Database(#[error(source)] sqlx::Error),
+    #[display("S3 error: {}", _0)]
+    S3(#[error(source)] Box<aws_sdk_s3::Error>),
+    #[display("Presigning config error: {}", _0)]
+    Presigning(#[error(source)] aws_sdk_s3::presigning::PresigningConfigError),
+    #[display("URL parse error: {}", _0)]
+    UrlParse(#[error(source)] url::ParseError),
     #[display("concurrency error: {}", _0)]
     Semaphore(#[error(source)] sync::AcquireError),
     #[display("task error: {}", _0)]
@@ -45,6 +51,42 @@ impl response::IntoResponse for ServerError {
                 tracing::error!("Database error: {err:?}");
                 let problem_details = responses::ProblemDetails::simple(
                     "Database Access Error",
+                    http::StatusCode::INTERNAL_SERVER_ERROR,
+                );
+                (
+                    http::StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(problem_details),
+                )
+                    .into_response()
+            }
+            Self::S3(err) => {
+                tracing::error!("S3 error: {err:?}");
+                let problem_details = responses::ProblemDetails::simple(
+                    "S3 Access Error",
+                    http::StatusCode::INTERNAL_SERVER_ERROR,
+                );
+                (
+                    http::StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(problem_details),
+                )
+                    .into_response()
+            }
+            Self::Presigning(err) => {
+                tracing::error!("Presigning config error: {err:?}");
+                let problem_details = responses::ProblemDetails::simple(
+                    "Presigning Config Error",
+                    http::StatusCode::INTERNAL_SERVER_ERROR,
+                );
+                (
+                    http::StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(problem_details),
+                )
+                    .into_response()
+            }
+            Self::UrlParse(err) => {
+                tracing::error!("URL parse error: {err:?}");
+                let problem_details = responses::ProblemDetails::simple(
+                    "URL Parse Error",
                     http::StatusCode::INTERNAL_SERVER_ERROR,
                 );
                 (
