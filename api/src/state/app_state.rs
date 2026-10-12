@@ -8,6 +8,7 @@ pub struct AppState {
     pub pool: sqlx::PgPool,
     pub passwords: state::PasswordService,
     pub jwt_config: std::sync::Arc<state::JwtConfig>,
+    pub s3_client: aws_sdk_s3::Client,
 }
 
 impl AppState {
@@ -33,10 +34,14 @@ impl AppState {
 
         let passwords = state::PasswordService::new(semaphore_size);
 
+        let config = config.s3_config().await;
+        let s3_client = aws_sdk_s3::Client::from_conf(config);
+
         Ok(Self {
             pool,
             passwords,
             jwt_config: std::sync::Arc::new(jwt_config),
+            s3_client,
         })
     }
 }

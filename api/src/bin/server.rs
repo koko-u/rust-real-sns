@@ -1,9 +1,7 @@
 use api::config;
 use api::cors;
-use api::keycloak_auth;
 use api::router;
 use api::state;
-use axum::middleware;
 use tower_http::trace;
 use tracing_subscriber::EnvFilter;
 

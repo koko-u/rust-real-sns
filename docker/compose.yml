@@ -37,43 +37,23 @@ services:
     entrypoint: [ "/bin/bash", "/pgadmin_entrypoint.sh" ]
     depends_on:
       - db
-  keycloak:
-    image: keycloak/keycloak:26.7
-    container_name: keycloak
+  fs:
+    image: rustfs/rustfs:1.0.1
+    container_name: rustfs
     restart: always
     ports:
-      - "8085:8080"
+      - "9000:9000"
+      - "9001:9001"
 
     environment:
-      - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN_USER}
-      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
-      - KC_DB=postgres
-      - KC_DB_URL=jdbc:postgresql://keycloak-db:5432/${KEYCLOAK_DB_NAME}
-      - KC_DB_USERNAME=${KEYCLOAK_DB_USER}
-      - KC_DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
-
-    command:
-      - start-dev
-      - --import-realm
+      - RUSTFS_ACCESS_KEY=${RUSTFS_ACCESS_KEY}
+      - RUSTFS_SECRET_KEY=${RUSTFS_SECRET_KEY}
+      - RUSTFS_CONSOLE_ENABLE=true
 
     volumes:
-      - ./realm:/opt/keycloak/data/import:ro
+      - real-sns_rustfs_data:/data
 
-    depends_on:
-      - keycloak-db
-  keycloak-db:
-    image: postgres:18-trixie
-    container_name: keycloak-db
-    restart: always
-
-    environment:
-      - POSTGRES_USER=${KEYCLOAK_DB_USER}
-      - POSTGRES_PASSWORD=${KEYCLOAK_DB_PASSWORD}
-      - POSTGRES_DB=${KEYCLOAK_DB_NAME}
-
-    volumes:
-      - real-sns_keycloak_data:/var/lib/postgresql
 volumes:
   real-sns_db_data:
   real-sns_pgadmin_data:
-  real-sns_keycloak_data:
+  real-sns_rustfs_data:

@@ -1,3 +1,4 @@
+use aws_sdk_s3::config;
 use axum::http;
 use secrecy::SecretString;
 use tower_http::cors;
@@ -47,17 +48,14 @@ pub struct Config {
     #[arg(long, env = "MAX_CONNECTIONS", default_value = "10")]
     max_connections: shared::MaxConnections,
 
-    #[arg(long, env = "KEYCLOAK_URL")]
-    keycloak_url: url::Url,
-    #[arg(long, env = "REAL_SNS_REALM")]
-    realm: String,
-    #[arg(long, env = "REAL_SNS_AUDIENCE")]
-    audience: String,
-
-    #[arg(long, env = "KEYCLOAK_ADMIN_CLIENT_ID")]
-    admin_client_id: String,
-    #[arg(long, env = "KEYCLOAK_ADMIN_CLIENT_SECRET")]
-    admin_client_secret: SecretString,
+    #[arg(long, env = "AWS_ACCESS_KEY_ID", default_value = "fsadmin")]
+    aws_access_key_id: String,
+    #[arg(long, env = "AWS_SECRET_ACCESS_KEY", default_value = "secret")]
+    aws_secret_access_key: SecretString,
+    #[arg(long, env = "AWS_REGION", default_value = "us-east-1")]
+    aws_region: String,
+    #[arg(long, env = "AWS_S3_ENDPOINT_URL", default_value = "http://localhost:9000")]
+    aws_s3_endpoint_url: url::Url,
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, derive_more::Display, derive_more::FromStr)]
@@ -130,37 +128,16 @@ impl Config {
         self.max_connections
     }
 
-    pub fn keycloak_url(&self) -> &url::Url {
-        &self.keycloak_url
-    }
+    pub async fn s3_config(&self) -> aws_sdk_s3::Config {
+        let sdk_config = aws_config::defaults(config::BehaviorVersion::latest())
+            .region(aws_config::Region::new(self.aws_region.to_string()))
+            .load()
+            .await;
 
-    pub fn realm(&self) -> &str {
-        &self.realm
-    }
-
-    pub fn audience(&self) -> &str {
-        &self.audience
-    }
-
-    pub fn admin_client_id(&self) -> &str {
-        &self.admin_client_id
-    }
-
-    pub fn admin_client_secret(&self) -> &SecretString {
-        &self.admin_client_secret
-    }
-
-    pub fn admin_client_url(&self) -> url::Url {
-        let mut url = self.keycloak_url.clone();
-        url.path_segments_mut().expect("Keycloak URL is invalid").extend([
-            "realms",
-            self.realm.as_str(),
-            "protocol",
-            "openid-connect",
-            "token",
-        ]);
-
-        url
+        config::Builder::from(&sdk_config)
+            .endpoint_url(self.aws_s3_endpoint_url.as_str())
+            .force_path_style(true)
+            .build()
     }
 }
 
