@@ -41,6 +41,17 @@ pub enum ServerError {
     #[display("Expired Session")]
     #[from(skip)]
     ExpiredSession { expires_at: time::UtcDateTime },
+    #[display("Not found: {}", message)]
+    #[from(skip)]
+    NotFound { message: String },
+}
+
+impl ServerError {
+    pub fn not_found(message: &str) -> Self {
+        Self::NotFound {
+            message: message.to_string(),
+        }
+    }
 }
 
 impl response::IntoResponse for ServerError {
@@ -200,6 +211,13 @@ impl response::IntoResponse for ServerError {
                 let problem_details =
                     responses::ProblemDetails::simple("Expired Session", http::StatusCode::UNAUTHORIZED);
                 (http::StatusCode::UNAUTHORIZED, axum::Json(problem_details)).into_response()
+            }
+            /*NOT FOUND*/
+            Self::NotFound { message } => {
+                tracing::warn!("Not Found: {}", message);
+                let problem_details =
+                    responses::ProblemDetails::simple(&message, http::StatusCode::NOT_FOUND);
+                (http::StatusCode::NOT_FOUND, axum::Json(problem_details)).into_response()
             }
         }
     }

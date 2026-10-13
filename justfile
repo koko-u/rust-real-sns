@@ -54,6 +54,10 @@ ui-fmt:
 [parallel]
 fmt: api-fmt ui-fmt
 
+# signup
+signup user email pass:
+    @xh POST :3000/api/auth/signup username={{ user }} email={{ email }} password={{ pass }}
+
 # login
 login user pass:
     @xh --session=/tmp/real-sns-cookie.json POST :3000/api/auth/login username={{ user }} password={{ pass }}

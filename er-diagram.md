@@ -5,6 +5,11 @@ erDiagram
         string username
         string password_hash
     }
+    profiles {
+        uuid user_id FK
+        string display_name 
+    }
+    users ||--o| profiles : "user has profile"
     sessions {
         uuid id PK
         uuid user_id FK
