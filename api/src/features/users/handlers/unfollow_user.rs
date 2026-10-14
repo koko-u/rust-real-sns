@@ -2,6 +2,7 @@ use axum::extract;
 use axum::http;
 
 use crate::errors;
+use crate::features::follows::repositories as f_repositories;
 use crate::features::users::models;
 use crate::shared;
 use crate::state;
@@ -25,5 +26,16 @@ pub async fn unfollow_user(
     extract::Path(target_id): extract::Path<models::UserId>,
     extract::State(state): extract::State<state::AppState>,
 ) -> Result<http::StatusCode, errors::ApiError> {
-    todo!()
+    let deleted = shared::transaction::<_, errors::ServerError, _>(&state.pool, async |tx| {
+        let affected_rows = f_repositories::delete(tx, current_user.id, target_id).await?;
+
+        Ok(affected_rows)
+    })
+    .await?;
+
+    if deleted == 0 {
+        return Err(errors::ServerError::not_found("target followee are not found").into());
+    }
+
+    Ok(http::StatusCode::NO_CONTENT)
 }

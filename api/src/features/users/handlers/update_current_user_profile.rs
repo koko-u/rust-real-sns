@@ -21,7 +21,7 @@ use crate::state;
     tag = "Users",
     description = "Update current user profile",
     responses(
-        (status = 200, description = "Updated Profile", body = responses::UserProfileResponse),
+        (status = 200, description = "Updated Profile", body = responses::MyUserProfileResponse),
         (status = 401, description = "Unauthorized error", body = shared::responses::ProblemDetails),
         (status = 500, description = "Internal server error", body = shared::responses::ProblemDetails),
     ),
@@ -31,7 +31,7 @@ pub async fn update_current_user_profile(
     extract::State(state): extract::State<state::AppState>,
     extract::Extension(current_user): extract::Extension<models::CurrentUser>,
     TypedMultipart(request): TypedMultipart<requests::UpdateUserProfileRequest>,
-) -> Result<axum::Json<responses::UserProfileResponse>, errors::ApiError> {
+) -> Result<axum::Json<responses::MyUserProfileResponse>, errors::ApiError> {
     // validation
     let commands::UpdateUserProfileCommand {
         display_name,
@@ -80,16 +80,10 @@ pub async fn update_current_user_profile(
     .await?;
 
     // get presigned url
-    let avatar_url = match avatar_key {
-        Some(avatar_key) => {
-            let avatar_url = state
-                .storage
-                .presigned_url(&avatar_key, time::Duration::days(1))
-                .await?;
-            Some(avatar_url)
-        }
-        None => None,
-    };
+    let avatar_url = state
+        .storage
+        .presigned_url_opt(avatar_key.as_deref(), time::Duration::days(1))
+        .await?;
 
     let user_profile = models::UserProfileModel::try_from_row(user_profile_row, avatar_url)?;
 

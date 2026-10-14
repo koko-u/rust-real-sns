@@ -18,7 +18,7 @@ use crate::state;
     tag = "Users",
     description = "Follow a user",
     responses(
-        (status = 200, description = "User's following users", body = responses::FollowingUserResponse),
+        (status = 200, description = "User's following users", body = responses::PublicUserProfileResponse),
         (status = 401, description = "Unauthorized error", body = shared::responses::ProblemDetails),
         (status = 500, description = "Internal server error", body = shared::responses::ProblemDetails),
     ),
@@ -31,7 +31,7 @@ pub async fn follow_user(
 ) -> Result<
     Either<
         (http::StatusCode, axum::Json<shared::responses::ProblemDetails>),
-        axum::Json<responses::FollowingUserResponse>,
+        axum::Json<responses::PublicUserProfileResponse>,
     >,
     errors::ApiError,
 > {
@@ -72,19 +72,13 @@ pub async fn follow_user(
         Either::Left(left) => Either::Left(left),
         Either::Right(row) => {
             // get presigned url
-            let avatar_url = match &row.avatar_key {
-                Some(avatar_key) => {
-                    let avatar_url = state
-                        .storage
-                        .presigned_url(avatar_key, time::Duration::days(1))
-                        .await?;
-                    Some(avatar_url)
-                }
-                None => None,
-            };
+            let avatar_url = state
+                .storage
+                .presigned_url_opt(row.avatar_key.as_deref(), time::Duration::days(1))
+                .await?;
 
             let user_profile = models::UserProfileModel::try_from_row(row, avatar_url)?;
-            let response = responses::FollowingUserResponse::from(user_profile);
+            let response = responses::PublicUserProfileResponse::from(user_profile);
             Either::Right(axum::Json(response))
         }
     };

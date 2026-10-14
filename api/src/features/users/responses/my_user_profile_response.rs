@@ -1,7 +1,7 @@
 use crate::features::users::models;
 
 #[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, utoipa::ToSchema)]
-pub struct UserProfileResponse {
+pub struct MyUserProfileResponse {
     pub id: uuid::Uuid,
     pub username: String,
     pub email: String,
@@ -12,7 +12,7 @@ pub struct UserProfileResponse {
     pub location: Option<String>,
 }
 
-impl From<models::UserProfileModel> for UserProfileResponse {
+impl From<models::UserProfileModel> for MyUserProfileResponse {
     fn from(model: models::UserProfileModel) -> Self {
         Self {
             id: model.id.into_inner(),

@@ -67,4 +67,18 @@ impl StorageService {
             }
         }
     }
+
+    pub async fn presigned_url_opt(
+        &self,
+        key: Option<&str>,
+        expires_in: time::Duration,
+    ) -> Result<Option<url::Url>, errors::ServerError> {
+        match key {
+            Some(key) => {
+                let url = self.presigned_url(key, expires_in).await?;
+                Ok(Some(url))
+            }
+            None => Ok(None),
+        }
+    }
 }

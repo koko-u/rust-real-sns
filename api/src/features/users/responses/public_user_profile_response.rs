@@ -3,7 +3,7 @@ use into_inner::IntoInner;
 use crate::features::users::models;
 
 #[derive(Debug, Clone, Eq, PartialEq, serde::Serialize, utoipa::ToSchema)]
-pub struct FollowingUserResponse {
+pub struct PublicUserProfileResponse {
     pub id: uuid::Uuid,
     pub username: String,
     pub display_name: Option<String>,
@@ -11,7 +11,7 @@ pub struct FollowingUserResponse {
     pub website_url: Option<url::Url>,
 }
 
-impl From<models::UserProfileModel> for FollowingUserResponse {
+impl From<models::UserProfileModel> for PublicUserProfileResponse {
     fn from(user_profile: models::UserProfileModel) -> Self {
         Self {
             id: user_profile.id.into_inner(),

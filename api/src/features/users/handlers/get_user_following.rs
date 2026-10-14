@@ -15,7 +15,7 @@ use crate::state;
     description = "Get following users",
     tag = "Users",
     responses(
-        (status = 200, description = "List of following users", body = Vec<responses::UserProfileResponse>),
+        (status = 200, description = "List of following users", body = Vec<responses::PublicUserProfileResponse>),
         (status = 500, description = "Internal server error", body = shared::responses::ProblemDetails),
     )
 )]
@@ -23,6 +23,6 @@ pub async fn get_user_following(
     extract::Path(user_id): extract::Path<models::UserId>,
     extract::State(state): extract::State<state::AppState>,
     extract::Extension(current_user): extract::Extension<models::CurrentUser>,
-) -> Result<axum::Json<Vec<responses::UserProfileResponse>>, errors::ApiError> {
+) -> Result<axum::Json<Vec<responses::PublicUserProfileResponse>>, errors::ApiError> {
     todo!()
 }
