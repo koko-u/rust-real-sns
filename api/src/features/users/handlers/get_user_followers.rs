@@ -1,8 +1,8 @@
 use axum::extract;
 
 use crate::errors;
-use crate::features::users::models;
 use crate::features::users::responses;
+use crate::features::users::{models, repositories};
 use crate::shared;
 use crate::state;
 
@@ -22,7 +22,19 @@ use crate::state;
 pub async fn get_user_followers(
     extract::Path(user_id): extract::Path<models::UserId>,
     extract::State(state): extract::State<state::AppState>,
-    extract::Extension(current_user): extract::Extension<models::CurrentUser>,
+    extract::Extension(_): extract::Extension<models::CurrentUser>,
 ) -> Result<axum::Json<Vec<responses::PublicUserProfileResponse>>, errors::ApiError> {
-    todo!()
+    let user_profile_rows =
+        repositories::select_following_user_profiles(&state.pool, user_id).await?;
+    let mut user_profiles = vec![];
+    for row in user_profile_rows {
+        let avatar_url = state
+            .storage
+            .presigned_url_opt(row.avatar_key.as_deref(), time::Duration::days(1))
+            .await?;
+        let user_profile = models::UserProfileModel::try_from_row(row, avatar_url)?;
+        user_profiles.push(user_profile.into());
+    }
+
+    Ok(axum::Json(user_profiles))
 }

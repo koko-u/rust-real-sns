@@ -4,6 +4,7 @@ mod insert;
 mod select_by_id;
 mod select_by_id_with_profile;
 mod select_by_username;
+mod select_followed_by_user_profiles;
 mod select_following_user_profiles;
 
 pub use exists_by_email::exists_by_email;
@@ -12,4 +13,5 @@ pub use insert::insert;
 pub use select_by_id::select_by_id;
 pub use select_by_id_with_profile::select_by_id_with_profile;
 pub use select_by_username::select_by_username;
+pub use select_followed_by_user_profiles::select_followed_by_user_profiles;
 pub use select_following_user_profiles::select_following_user_profiles;
